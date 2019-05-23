@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 /**
@@ -17,10 +18,9 @@ import android.view.ViewGroup;
 public class ContactList extends Fragment {
 
     RecyclerView recyclerView;
-    RecyclerView.Adapter myAdapter;
+    PersonAdapter myAdapter;
     RecyclerView.LayoutManager layoutManager ;
     View view ;
-
     public ContactList() {
         // Required empty public constructor
     }
@@ -46,15 +46,16 @@ public class ContactList extends Fragment {
 
         myAdapter = new PersonAdapter(this.getActivity(),ApplicationClass.people);
         recyclerView.setAdapter(myAdapter);
+
+
     }
 
 
     public void notifyDataChange() {
-       myAdapter.notifyDataSetChanged();
+        Toast.makeText(getContext(), "Data updated", Toast.LENGTH_SHORT).show();
+        myAdapter.notifyDataSetChanged();
+
     }
-
-
-
 
 }
 

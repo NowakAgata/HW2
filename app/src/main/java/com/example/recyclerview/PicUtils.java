@@ -14,7 +14,6 @@ public class PicUtils {
         options.inJustDecodeBounds = false;
 
         return BitmapFactory.decodeFile(pPath,options);
-
     }
 
     private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -34,4 +33,6 @@ public class PicUtils {
         }
         return  inSampleSize ;
     }
+
+
 }

@@ -1,11 +1,8 @@
 package com.example.recyclerview;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -19,12 +16,14 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class AddContact extends AppCompatActivity {
 
 
-    String name, date, description, photoPath = null ;
+    String i, name, date, description, photoPath = null ;
     EditText etName, etDate, etDesc ;
     Bitmap pic ;
     ImageView imPic;
@@ -44,13 +43,11 @@ public class AddContact extends AppCompatActivity {
         Intent i = getIntent();
         photoPath = i.getStringExtra("PIC_PATH") ;
         if(photoPath != null){
-//            int width = imPic.getMaxWidth();
-//            int height = imPic.getMaxHeight();
             pic = PicUtils.decodePic(photoPath,
                     200,
                     200) ;
             imPic.setImageBitmap(pic);
-            Toast.makeText(this, "ustawiam fotkę "+photoPath, Toast.LENGTH_SHORT).show();
+
             flag = true ;
         }else {
             imPic.setImageResource(R.drawable.avatar_2);
@@ -63,23 +60,36 @@ public class AddContact extends AppCompatActivity {
         if(etName.getText().toString().isEmpty() || etDate.getText().toString().isEmpty()
                 || etDesc.getText().toString().isEmpty()) {
             Toast.makeText(this, "Enter all data!", Toast.LENGTH_SHORT).show();
-        }else {
+        } else if (!validateDate(etDate.getText().toString())) {
+            Toast.makeText(this, "Please enter a valid date! (format DD/MM/YYYY)", Toast.LENGTH_SHORT).show();
+        } else {
             String delim = ";";
             String line, fileName;
             name = etName.getText().toString();
             date = etDate.getText().toString();
             description = etDesc.getText().toString();
+
+            i = getCount("counter2.txt") ;
+            if(i == null || i=="0")
+                i = "1" ;
+            else {
+                int temp  = Integer.parseInt(i);
+                temp ++ ;
+                i = String.valueOf(temp);
+            }
+            fileName = "file" + i + ".txt";
             if(flag){
-                ApplicationClass.people.add(new Person(name, date, description, photoPath));
-                line = name + delim + date + delim + description + delim + photoPath ;
+                ApplicationClass.people.add(new Person(i, name, date, description, photoPath));
+                line = i + delim + name + delim + date + delim + description + delim + photoPath ;
 
             } else{
-                ApplicationClass.people.add(new Person(name, date, description));
-                line = name + delim + date + delim + description ;
+                ApplicationClass.people.add(new Person(i, name, date, description));
+                line = i + delim + name + delim + date + delim + description ;
             }
-            fileName = "file" + getCount() + ".txt";
+
             if (saveStringToFile(fileName, line)) {
-                incrementCount();
+                incrementCount("counter.txt");
+                incrementCount("counter2.txt");
                 setResult(1);
                 finish();
             } else {
@@ -106,15 +116,15 @@ public class AddContact extends AppCompatActivity {
         }
     }
 
-    private String getCount () {
+    private String getCount (String fileName) {
         String line ;
         try {
-            FileInputStream fileInputStream = openFileInput("counter.txt");
+            FileInputStream fileInputStream = openFileInput(fileName);
             BufferedReader reader = new BufferedReader(new FileReader(fileInputStream.getFD()));
             if((line = reader.readLine())!= null) {
                 return line;
             }else{
-                return null ;
+                return null;
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -126,20 +136,30 @@ public class AddContact extends AppCompatActivity {
         }
     }
 
-    private void incrementCount() {
+    private void incrementCount(String fileName) {
 
-        String line ;
+        String line;
         int i ;
-        line = getCount();
+        line = getCount(fileName);
         if(line != null) {
             i = Integer.parseInt(line);
-            i = i+1;
+            i++;
             line = "" + i ;
         }else{
-            line = "0" ;
+            line = "1" ;
         }
-        saveStringToFile("counter.txt",line) ;
+        saveStringToFile(fileName,  line);
     }
 
 
+    private boolean validateDate(String date){
+        String regex = "^(1[0-2]|0[1-9])/(3[01]"
+                + "|[12][0-9]|0[1-9])/[0-9]{4}$";
+        Pattern pattern = Pattern.compile(regex) ;
+        Matcher matcher = pattern.matcher((CharSequence)date);
+        return matcher.matches() ;
+
+
+
+    }
 }

@@ -1,13 +1,15 @@
 package com.example.recyclerview;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
@@ -18,15 +20,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class MainActivity extends AppCompatActivity implements
-        DeleteDialogFragment.OnDeleteDialogFragmentInteractionListener
+public class MainActivity extends AppCompatActivity
 {
 
+    static final int REQUEST_ADD_PERSON =1;
     static final int REQUEST_IMAGE_CAPTURE = 2 ;
-    final private int currentItemPosition = -1;
-   // public static final String taskExtra = "taskExtra" ;
+    static final int REQUEST_DELETE_PERSON = 3;
     String photoPath ;
-
+    int currentPerson =-1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,12 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    private void displayInfoTask(int person) {
+        ContactInfoFragment contactInfoFragment = ((ContactInfoFragment) getSupportFragmentManager().findFragmentById(R.id.infoFrag));
+        if(contactInfoFragment != null){
+            contactInfoFragment.displayPerson(person);
+        }
+    }
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_" ;
@@ -50,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public void add_contact(View view) {
         Intent intent = new Intent(getApplicationContext(), AddContact.class);
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, REQUEST_ADD_PERSON);
     }
 
     public void addPhoto(View view)  {
@@ -74,21 +81,56 @@ public class MainActivity extends AppCompatActivity implements
 
     public void on_row_click(View view) {
         int i = (int) view.getTag();
-        Intent intent = new Intent(getApplicationContext(), ContactInfoActivity.class);
-        intent.putExtra("TAG", i);
-        startActivityForResult(intent, 3);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+
+            displayInfoTask(i);
+
+
+        } else{
+            Intent intent = new Intent(getApplicationContext(), ContactInfoActivity.class);
+            intent.putExtra("TAG", i);
+            startActivityForResult(intent, 2);
+        }
+
+
     }
 
+    public void delete_row(View view) {
+        currentPerson = (int) view.getTag();
+        showDeleteDialog();
+    }
 
-    private void showDeleteDialog() {
-        DeleteDialogFragment.newInstance().show(getSupportFragmentManager(), getString(R.string.delete_dialog_tag));
+    public void showDeleteDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.delete_dialog_tag));
+        builder.setMessage(getString(R.string.delete_question));
+        builder.setPositiveButton(getString(R.string.dialog_confirm), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                Intent i = new Intent(getApplicationContext(), DeletePerson.class) ;
+                i.putExtra("PERSON", currentPerson);
+                startActivityForResult(i, REQUEST_DELETE_PERSON);
+
+            }
+        });
+        builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String temp =  ApplicationClass.people.get(currentPerson).getName() ;
+                Toast.makeText(getApplicationContext(), "Deleting person "+temp +" canceled", Toast.LENGTH_SHORT).show();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
-        if (requestCode == 1) {
+        if (requestCode == REQUEST_ADD_PERSON) {
             if (resultCode == 1) {
                 Toast.makeText(this, "Person added succesfully", Toast.LENGTH_SHORT).show();
                 ((ContactList) getSupportFragmentManager().findFragmentById(R.id.listFrag)).notifyDataChange();
@@ -101,38 +143,17 @@ public class MainActivity extends AppCompatActivity implements
 
             Intent i = new Intent(getApplicationContext(), AddContact.class) ;
             i.putExtra("PIC_PATH", photoPath);
-            startActivityForResult(i, 1);
+            startActivityForResult(i, REQUEST_ADD_PERSON);
+        } else if(requestCode == REQUEST_DELETE_PERSON){
+            if(resultCode == 1) {
+                Toast.makeText(this, "Person deleted succesfully", Toast.LENGTH_SHORT).show();
+                ((ContactList) getSupportFragmentManager().findFragmentById(R.id.listFrag)).notifyDataChange();
 
-
+            } else if(resultCode==0){
+                Toast.makeText(this, "Person is not deleted, something went wrong", Toast.LENGTH_SHORT).show();
+            }
         }
 
     }
 
-    @Override
-    public void onDialogPositiveClick(DeleteDialogFragment dialog) {
-        if(currentItemPosition != -1 && currentItemPosition < ApplicationClass.people.size()) {
-            Toast.makeText(this, "positive click" , Toast.LENGTH_SHORT).show();
-
-//            if( removeItem(currentItemPosition) ) {
-//                ((ContactList) getSupportFragmentManager().findFragmentById(R.id.listFrag)).notifyDataChange();
-//            }
-        }
-    }
-
-    @Override
-    public void onDialogNegativeClick(DeleteDialogFragment dialog) {
-        Toast.makeText(this, "negative click" , Toast.LENGTH_SHORT).show();
-
-    }
-
-    private boolean removeItem(int index){
-        Toast.makeText(this, "usunięto: "+ index, Toast.LENGTH_SHORT).show();
-
-        return true;
-    }
-
-
-    public void delete_row(View view) {
-        showDeleteDialog();
-    }
 }

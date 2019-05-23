@@ -20,7 +20,8 @@ import android.widget.TextView;
  */
 public class ContactInfoFragment extends Fragment {
 
-
+    private static int maxWidth = -1;
+    private static int maxHeight = -1;
     public ContactInfoFragment() {
         // Required empty public constructor
     }
@@ -29,13 +30,16 @@ public class ContactInfoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_contact_info, container, false);
 
     }
 
     public void onActivityCreated(@Nullable Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
+
+        maxWidth = 200;
+        maxHeight = 200;
         Intent intent = getActivity().getIntent();
         if(intent != null){
             int i = intent.getIntExtra("TAG", 1);
@@ -55,14 +59,19 @@ public class ContactInfoFragment extends Fragment {
         tvName.setText(person.getName());
         tvDate.setText(person.getDate());
         tvDesc.setText(person.getDescription());
+
+        if(maxWidth == -1 || maxHeight == -1){
+            maxWidth = 100;
+            maxHeight = 100;
+        }
         if(person.getPic() != null && !person.getPic().isEmpty()) {
             Handler handler = new Handler() ;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     Bitmap cameraImage = PicUtils.decodePic(person.getPic(),
-                            200,
-                            200);
+                            maxWidth,
+                            maxHeight);
                     ivPic.setImageBitmap(cameraImage);
                 }
             },200);
@@ -71,4 +80,6 @@ public class ContactInfoFragment extends Fragment {
             ivPic.setImageResource(R.drawable.avatar_2);
 
     }
+
+
 }

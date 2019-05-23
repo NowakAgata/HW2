@@ -7,7 +7,6 @@
     <string name="photo">photo</string>
     <string name="name">Agata</string>
     <string name="myFileprovider">com.example.recyclerview.fileprovider</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="infoName">contact name</string>
     <string name="infoDate">contact date</string>

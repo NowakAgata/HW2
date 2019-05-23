@@ -1,9 +1,6 @@
 package com.example.recyclerview;
 
 import android.app.Application;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Base64;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -21,37 +18,43 @@ public class ApplicationClass extends Application {
     public void onCreate() {
         super.onCreate();
         people = new ArrayList<Person>();
+
         String delim = ";";
-        String line, name, date, desc, pic ,  fileName ;
+        String line,id,  name, date, desc, pic ,  fileName ;
+
         String[] allLine;
+
         int count = getCount() ;
-        for (int i=0; i < count; i++ ){
+        int i = 1, c=0;
+        while (c < count ){
             fileName = "file" + i + ".txt";
             try {
                 FileInputStream fileInputStream = openFileInput(fileName);
                 BufferedReader reader = new BufferedReader(new FileReader(fileInputStream.getFD()));
-                if((line = reader.readLine()) != null) {
+                if((line = reader.readLine()) != null && !line.equals("")) {
                     allLine = line.split(delim);
-                    name = allLine[0];
-                    date = allLine[1];
-                    desc = allLine[2];
+                    id = String.valueOf(i) ;
+                    name = allLine[1];
+                    date = allLine[2];
+                    desc = allLine[3];
                     try {
-                        pic = allLine[3];
-                        people.add(new Person(name, date, desc, pic));
+                        pic = allLine[4];
+                        people.add(new Person(id,name, date, desc, pic));
+                        c++ ;
                     } catch (ArrayIndexOutOfBoundsException e) {
-                        people.add(new Person(name, date, desc));
+                        people.add(new Person(id,name, date, desc));
+                        c++ ;
                     }
 
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            i++;
         }
     }
 
-    private int getCount () {
+     public int getCount () {
         String line ;
         try {
             FileInputStream fileInputStream = openFileInput("counter.txt");

@@ -1,23 +1,24 @@
 package com.example.recyclerview;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Person implements Parcelable {
+    private String id ;
     private String name ;
     private String date;
     private String description;
     private String pic;
 
-    public Person( String name, String date, String description, String pic) {
+    public Person( String id, String name, String date, String description, String pic) {
+        this.id = id;
         this.pic = pic;
         this.name = name;
         this.date = date;
         this.description = description;
     }
-    public Person( String name, String date, String description) {
+    public Person( String id,String name, String date, String description) {
+        this.id =id;
         this.pic = null;
         this.name = name;
         this.date = date;
@@ -25,6 +26,7 @@ public class Person implements Parcelable {
     }
 
     protected Person(Parcel in) {
+        id = in.readString();
         name = in.readString();
         date = in.readString();
         description = in.readString();
@@ -47,9 +49,6 @@ public class Person implements Parcelable {
         return pic;
     }
 
-    public void setPic(String pic) {
-        this.pic = pic;
-    }
 
     public String getName() {
         return name;
@@ -63,17 +62,13 @@ public class Person implements Parcelable {
         return date;
     }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
-
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+
+    public String getId() {return  this.id;}
+
 
     @Override
     public int describeContents() {
@@ -82,6 +77,7 @@ public class Person implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
         dest.writeString(name);
         dest.writeString(date);
         dest.writeString(description);
